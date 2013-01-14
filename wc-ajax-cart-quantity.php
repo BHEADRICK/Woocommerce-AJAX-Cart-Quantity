@@ -3,7 +3,7 @@
 Plugin Name: WooCommerce AJAX Cart Quantity
 Plugin URI: http://www.bryanheadrick.com
 Description: Page Caching safe method to display current cart quantity on a menu item
-Version: 1.0.0
+Version: 1.1
 Author: Bryan Headrick
 Author URI: http://www.bryanheadrick.com
 */
@@ -65,10 +65,8 @@ if (!class_exists('wc_ajax_cart_quantity')) {
 			//Initialize the options
 			$this->getOptions();
 			//Admin menu
-			add_action("admin_menu", array(&$this,"admin_menu_link"));
-
+			
 			//Actions
-			add_action('admin_enqueue_scripts', array(&$this,'wc_ajax_cart_quantity_script')); // or wp_enqueue_scripts, login_enqueue_scripts
 			add_action("init", array(&$this,"wc_ajax_cart_quantity_init"));
                           add_action( 'wp_enqueue_scripts', array(&$this,'wcajaxcartqty_addscripts') );
                      add_action( 'wp_ajax_nopriv_get_ajax_cart_qty', array(&$this,'get_ajax_cart_qty'));
@@ -76,10 +74,11 @@ if (!class_exists('wc_ajax_cart_quantity')) {
         
 		}
                 function wcajaxcartqty_addscripts(){
+                    if(!is_admin()):
                     wp_enqueue_script('wcajaxcartqty_script',plugins_url('', __FILE__) . '/ajax.js',array('jquery'));
                     $cartpage = get_post(get_option('woocommerce_cart_page_id'));
                     wp_localize_script('wcajaxcartqty_script', 'cart_page', array('cart_url'=>  $cartpage->guid,'wpajaxurl'=>admin_url( 'admin-ajax.php' )));
-                    
+                    endif;
                 }
 		function wc_ajax_cart_quantity_init() {
 
@@ -119,7 +118,7 @@ if (!class_exists('wc_ajax_cart_quantity')) {
 		* @desc Adds the options subpanel
 		*/
 		function admin_menu_link() {
-			add_options_page('Plugin with menu no widget', 'Plugin with menu no widget', 10, basename(__FILE__), array(&$this,'admin_options_page'));
+			add_options_page('WooCommerce AJAX Cart Quantity Options', 'WooCommerce AJAX Cart Quantity Options', 10, basename(__FILE__), array(&$this,'admin_options_page'));
 			add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), array(&$this, 'filter_plugin_actions'), 10, 2 );
 		}
 
@@ -152,7 +151,7 @@ if (!class_exists('wc_ajax_cart_quantity')) {
 			}
 ?>								   
 			<div class="wrap">
-			<h2>Plugin with menu no widget</h2>
+			<h2>WooCommerce AJAX Cart Quantity Options</h2>
 			<p>
 			<?php _e('DESCRIPTION', $this->localizationDomain); ?>
 			</p>
@@ -190,7 +189,7 @@ if (isset($_GET['wc_ajax_cart_quantity_javascript'])) {
 	Header("content-type: application/x-javascript");
 	echo<<<ENDJS
 /**
-* @desc Plugin with menu no widget
+* @desc WooCommerce AJAX Cart Quantity
 * @author Bryan Headrick - http://www.bryanheadrick.com
 */
 
